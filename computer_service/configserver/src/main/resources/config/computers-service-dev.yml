@@ -1,0 +1,87 @@
+client-id: computers-service
+resource-url: http://localhost:8080/realms/ComputerServiceRealm/protocol/openid-connect/token
+grant-type: password
+
+spring:
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+  mvc:
+    static-path-pattern: /**
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    cache: false
+  datasource:
+    url: jdbc:postgresql://database:5432/ComputersService
+    username: postgres
+    password: psix19990
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+      enabled-by-default: true
+  security:
+    ignored: /style/**, /images/**, /static/**, /css/**, /js/**, /favicon.ico
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: computers-service
+            authorization-grant-type: authorization_code
+            scope: openid
+            redirect-uri: "http://localhost:8081/login/oauth2/code/keycloak"
+        provider:
+          keycloak:
+            issuer-uri: http://host.docker.internal:8080/realms/ComputerServiceRealm
+      resourceserver:
+        jwt:
+          issuer-uri: http://host.docker.internal:8080/realms/ComputerServiceRealm
+  rabbitmq:
+    host: host.docker.internal
+    port: 5672
+    username: admin
+    password: admin
+    connection-timeout: 5000
+  ai:
+    ollama:
+      base-url: http://ollama:11434
+      embedding:
+        options:
+          model: nomic-embed-text
+          num-predict: 512
+      chat:
+        options:
+          model: t-tech/T-lite-it-2.1:q8_0
+          temperature: 0.1
+          num-predict: 1024
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 768
+        initialize-schema: true
+        table-name: vector_store
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eurekaserver:8070/eureka/
+
+app:
+  rag:
+    init-on-startup: true

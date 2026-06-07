@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: license-gatewayserver
+  cloud:
+    config:
+      uri: http://license-configserver:8071
+      fail-fast: true

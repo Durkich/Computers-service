@@ -1,0 +1,84 @@
+<section class="u-black u-clearfix u-container-style u-dialog-block u-opacity u-opacity-70 u-valign-middle u-dialog-section-12" id="addLaptopModal" th:fragment="add-laptop">
+    <div class="u-container-style u-dialog u-white u-dialog-1">
+        <div class="u-container-layout u-valign-top u-container-layout-1">
+            <div class="custom-expanded u-form u-form-1">
+                <form th:action="@{/laptops/create}" th:object="${laptop}" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" style="padding: 10px;" method="post">
+                    <div class="u-form-group u-form-name">
+                        <label for="createLaptopInvetoryNumber" class="u-label">Инвентарный номер</label>
+                        <input type="text" th:field="*{inventoryNumber}" placeholder="Введите инвентарный номер" id="createLaptopInvetoryNumber" name="createLaptopInvetoryNumber" class="u-input u-input-rectangle" required="">
+                    </div>
+                    <div class="u-form-group">
+                        <label for="createLaptopGraphicAdapter" class="u-label">Графический адаптер</label>
+                        <input type="text" th:field="*{graphicAdapter}" placeholder="Введите графический адаптер" id="createLaptopGraphicAdapter" name="createLaptopGraphicAdapter" class="u-input u-input-rectangle">
+                    </div>
+                    <div class="u-form-group u-form-group-3">
+                        <label for="createProcessor" class="u-label">Процессор</label>
+                        <input type="text" th:field="*{processor}" id="createProcessor" name="createProcessor" class="u-input u-input-rectangle" placeholder="Введите процессор" required="required">
+                    </div>
+                    <div class="u-form-group u-form-group-4">
+                        <label for="createLaptopROM" class="u-label">Объем ПЗУ</label>
+                        <input type="text" th:field="*{rom}" placeholder="Введите ПЗУ" id="createLaptopROM" name="createLaptopROM" class="u-input u-input-rectangle" required="required">
+                    </div>
+                    <div class="u-form-group u-form-group-5">
+                        <label for="createLaptopRAM" class="u-label">Объем ОЗУ</label>
+                        <input type="text" th:field="*{ram}" placeholder="Введите ОЗУ" id="createLaptopRAM" name="createLaptopRAM" class="u-input u-input-rectangle" required="required">
+                    </div>
+                    <div class="u-form-group u-form-group-6">
+                        <label for="createLaptopDisplay" class="u-label">Дисплей</label>
+                        <input type="text" th:field="*{display}" id="createLaptopDisplay" name="createLaptopDisplay" class="u-input u-input-rectangle" placeholder="Введите дисплей" required="required">
+                    </div>
+                    <div class="u-align-right u-form-group u-form-submit">
+                        <button type="submit" class="u-btn u-btn-round u-btn-submit u-button-style u-radius u-btn-1">Сохранить </button>
+                        <input type="submit" value="submit" class="u-form-control-hidden">
+                    </div>
+                    <div class="u-form-send-message u-form-send-success"> Экземпляр был создан!. </div>
+                    <div class="u-form-send-error u-form-send-message"> Отправка не удалась. Пожалуйста, исправьте ошибки и попробуйте еще раз. </div>
+                </form>
+            </div>
+        </div><button data-dismiss="modal" class="u-dialog-close-button u-icon u-text-grey-40 u-icon-1"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-efe9"></use></svg><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-efe9"><rect x="7" y="0" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="2" height="16"></rect><rect x="0" y="7" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="16" height="2"></rect></svg></button>
+    </div>
+    <style>.u-dialog-section-12 .u-dialog-1 {
+        width: 800px;
+        min-height: 667px;
+        margin: 60px auto;
+    }
+    .u-form-group {
+        margin-bottom: 10px;
+    }
+
+    .u-dialog-section-12 .u-container-layout-1 {
+        padding: 30px;
+    }
+
+    .u-dialog-section-12 .u-form-1 {
+        height: 607px;
+        width: 740px;
+        margin: 0;
+    }
+
+    .u-dialog-section-12 .u-form-group-3 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-12 .u-form-group-4 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-12 .u-form-group-5 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-12 .u-form-group-6 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-12 .u-btn-1 {
+        --radius: 18px;
+    }
+
+    .u-dialog-section-12 .u-icon-1 {
+        width: 20px;
+        height: 20px;
+    }
+    </style>
+</section>

@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: license-eurekaserver
+  cloud:
+    config:
+      uri: http://license-configserver:8071

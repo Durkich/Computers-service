@@ -1,0 +1,53 @@
+.u-section-1 .u-sheet-1 {
+  min-height: 843px;
+}
+
+.u-section-1 .u-group-1 {
+  width: 384px;
+  height: 384px;
+  --radius: 15px;
+  margin: 165px auto 60px;
+}
+
+.u-section-1 .u-container-layout-1 {
+  padding: 0 0 30px;
+}
+
+.u-section-1 .u-text-1 {
+  margin: 12px auto 0;
+}
+
+.u-section-1 .u-form-1 {
+  height: 254px;
+  width: 297px;
+  margin: 9px 43px 0 44px;
+}
+
+.u-section-1 .u-input-1 {
+  --radius: 10px;
+}
+
+.u-section-1 .u-input-2 {
+  --radius: 10px;
+}
+
+.u-section-1 .u-btn-1 {
+  --radius: 10px;
+}
+
+@media (max-width: 1199px) {
+  .u-section-1 .u-group-1 {
+    height: auto;
+  }
+}
+
+@media (max-width: 575px) {
+  .u-section-1 .u-group-1 {
+    width: 340px;
+  }
+
+  .u-section-1 .u-form-1 {
+    margin-right: 21px;
+    margin-left: 22px;
+  }
+}

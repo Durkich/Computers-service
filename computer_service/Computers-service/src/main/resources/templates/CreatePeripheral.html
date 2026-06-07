@@ -1,0 +1,135 @@
+<section class="u-black u-clearfix u-container-style u-dialog-block u-opacity u-opacity-70 u-dialog-section-16" id="addPeripheralModal" th:fragment="add-peripheral">
+    <div class="u-container-style u-dialog u-white u-dialog-1">
+        <div class="u-container-layout u-valign-top u-container-layout-1">
+            <div class="custom-expanded u-form u-form-1">
+                <form th:action="@{/peripherals/create}" th:object="${peripheral}" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" style="padding: 10px;" method="post">
+                    <div class="u-form-group u-form-name">
+                        <label for="createPeripheralName" class="u-label">Название</label>
+                        <input type="text" th:field="*{peripheralName}" placeholder="Введите название периферии" id="createPeripheralName" name="createPeripheralName" class="u-input u-input-rectangle" required="">
+                    </div>
+                    <div class="u-form-group">
+                        <label for="createPeripheralType" class="u-label">Тип</label>
+                        <input type="text" th:field="*{peripheralType}" placeholder="Введите тип периферии" id="createPeripheralType" name="createPeripheralType" class="u-input u-input-rectangle" required="required">
+                    </div>
+                    <div class="u-form-group u-form-select u-form-group-3">
+                        <label for="createSelectComputerPeripheral" class="u-label">Инвентарный номер компьютера</label>
+                        <div class="u-form-select-wrapper">
+                            <select th:field="*{computer.id}"  id="createSelectComputerPeripheral" name="createSelectComputerPeripheral" class="u-input u-input-rectangle">
+                                <option value="">Выберите компьютер</option>
+                                <option th:each="computer : ${computers}" th:value="${computer.id}" th:text="${computer.inventoryNumber}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="u-form-group u-form-select u-form-group-4">
+                        <label for="createSelectLaptopPeripheral" class="u-label">Инвентарный номер ноутбука</label>
+                        <div class="u-form-select-wrapper">
+                            <select th:field="*{laptop.id}" id="createSelectLaptopPeripheral" name="createSelectLaptopPeripheral" class="u-input u-input-rectangle">
+                                <option value="">Выберите ноутбук</option>
+                                <option th:each="laptop : ${laptops}" th:value="${laptop.id}" th:text="${laptop.inventoryNumber}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="u-align-right u-form-group u-form-submit">
+                        <button type="submit" class="u-btn u-btn-round u-btn-submit u-button-style u-radius u-btn-1">Сохранить</button>
+                        <input type="submit" value="submit" class="u-form-control-hidden">
+                    </div>
+                    <div class="u-form-send-message u-form-send-success"> Экземпляр был создан! </div>
+                    <div class="u-form-send-error u-form-send-message"> Отправка не удалась. Пожалуйста, исправьте ошибки и попробуйте еще раз. </div>
+                </form>
+            </div>
+        </div><button data-dismiss="modal" class="u-dialog-close-button u-icon u-text-grey-40 u-icon-1"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-efe9"></use></svg><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-efe9"><rect x="7" y="0" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="2" height="16"></rect><rect x="0" y="7" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="16" height="2"></rect></svg></button>
+    </div>
+    <style>.u-dialog-section-16 .u-dialog-1 {
+        width: 800px;
+        min-height: 314px;
+        margin: 60px auto;
+    }
+    .u-form-group {
+        margin-bottom: 10px;
+    }
+
+    .u-dialog-section-16 .u-container-layout-1 {
+        padding: 30px;
+    }
+
+    .u-dialog-section-16 .u-form-1 {
+        height: 254px;
+        width: 740px;
+        margin: 0;
+    }
+
+    .u-dialog-section-16 .u-form-group-3 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-16 .u-form-group-4 {
+        margin-left: 0;
+    }
+
+    .u-dialog-section-16 .u-btn-1 {
+        --radius: 18px;
+    }
+
+    .u-dialog-section-16 .u-icon-1 {
+        width: 20px;
+        height: 20px;
+    }
+
+    @media (max-width: 991px) {
+        .u-dialog-section-16 .u-dialog-1 {
+            width: 720px;
+        }
+
+        .u-dialog-section-16 .u-form-1 {
+            width: 660px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .u-dialog-section-16 .u-dialog-1 {
+            width: 540px;
+        }
+
+        .u-dialog-section-16 .u-container-layout-1 {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .u-dialog-section-16 .u-form-1 {
+            width: 520px;
+        }
+    }
+
+    @media (max-width: 575px) {
+        .u-dialog-section-16 .u-dialog-1 {
+            width: 340px;
+        }
+
+        .u-dialog-section-16 .u-form-1 {
+            width: 320px;
+        }
+    }
+    </style>
+    <script>
+        var computerSelect = document.getElementById("createSelectComputerPeripheral");
+        var laptopSelect = document.getElementById("createSelectLaptopPeripheral");
+
+        computerSelect.addEventListener("change", function() {
+            if (computerSelect.value !== "") {
+                laptopSelect.disabled = true;
+                laptopSelect.value = "";
+            } else {
+                laptopSelect.disabled = false;
+            }
+        });
+
+        laptopSelect.addEventListener("change", function() {
+            if (laptopSelect.value !== "") {
+                computerSelect.disabled = true;
+                computerSelect.value = "";
+            } else {
+                computerSelect.disabled = false;
+            }
+        });
+    </script>
+</section>

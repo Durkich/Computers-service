@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <title>Список лицензий</title>
+  <link rel="stylesheet" href="/static/style/style.css" type="text/css" th:href="@{/static/style/style.css}">
+  <link rel="stylesheet" href="/static/style/licenses.css" type="text/css" th:href="@{/static/style/licenses.css}">
+  <script class="u-script" type="text/javascript" src="/static/style/js.js" th:src="@{/static/style/js.js}"></script>
+  <script class="u-script" type="text/javascript" src="/static/style/general.js" th:src="@{/static/style/general.js}"></script>
+  <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+  <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+    function openDeleteModal(id) {
+      $.ajax({
+        url: "/licenses/delete/" + id,
+        success: function(data){
+          $("#deleteLicenseModalHolder").html(data);
+          $('#deleteLicenseModal').modal({
+            backdrop: 'static'
+          });
+        }
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    function clearSearch() {
+      window.location = "[[@{/licenses}]]";
+    }
+  </script>
+
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: rgba(0,0,0,0.7);
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      width: 90%;
+      max-width: 1085px;
+      border-radius: 5px;
+      border-style: solid;
+      border-width: 2px;
+      border-color: #b3b3b3;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    /* Кнопка закрытия */
+    button.u-dialog-close-button {
+      position: absolute !important;
+      right: 15px !important;
+      top: 15px !important;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="ru">
+<div id="myModal" class="modal">
+  <div class="custom-expanded u-table u-table-responsive u-table-1">
+    <div class="modal-content" style="border-radius: 5px; border-style: solid; border-width: 2px;
+    border-color: #b3b3b3; margin: 80px auto; position: absolute;
+    left: 50%; top: 50%; transform: translate(-50%, -75%);">
+      <button type="button" class="u-dialog-close-button u-icon u-text-grey-40 u-icon-1" style="height: 20px; width: 20px;">
+        <svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style="">
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-efe9"></use>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-efe9">
+          <rect x="7" y="0" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="2" height="16"></rect>
+          <rect x="0" y="7" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.3138 8.0002)" width="16" height="2"></rect>
+        </svg>
+      </button>
+      <p style="font-weight: 700; font-size: 1.25rem; text-align: center;
+      margin-top: 39px; margin-bottom: 20px;">Список лицензий с истекающим сроком действия:</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var modal = document.getElementById("myModal");
+  var button = document.getElementsByClassName("u-dialog-close-button u-icon u-text-grey-40 u-icon-1")[0];
+  button.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  function parseDate(str) {
+    var parts = str.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function isExpiringSoon(endDateStr) {
+    var today = new Date();
+    var endDate = parseDate(endDateStr);
+    var timeDiff = endDate.getTime() - today.getTime();
+    var dayDiff = timeDiff / (1000 * 3600 * 24);
+    return dayDiff <= 30;
+  }
+
+  function populateModalWithExpiringLicenses() {
+    var table = document.querySelector('.u-section-1 .u-table-entity-1');
+    var rows = table.querySelectorAll('tbody tr');
+    var expiringLicenses = [];
+
+    rows.forEach(function(row) {
+      var endDateStr = row.cells[3].textContent;
+      if (isExpiringSoon(endDateStr)) {
+        expiringLicenses.push(row.cloneNode(true));
+      }
+    });
+
+    var modalTable = document.createElement('table');
+    modalTable.className = 'u-table-entity u-table-entity-1';
+    modalTable.style.margin = '0 auto';
+    modalTable.style.width = '941px';
+    modalTable.style.marginBottom = '45px';
+
+    var colgroup = document.createElement('colgroup');
+    var colWidths = ["16.6%", "16.6%", "16.6%", "16.6%", "16.6%", "16.6%", "17.000000000000004%"];
+    colWidths.forEach(function(width) {
+      var col = document.createElement('col');
+      col.style.width = width;
+      colgroup.appendChild(col);
+    });
+    modalTable.prepend(colgroup);
+
+    var thead = table.querySelector('thead').cloneNode(true);
+    thead.className = 'u-align-center u-custom-font u-font-montserrat u-table-header u-table-header-1';
+    thead.style.fontWeight = '700';
+    thead.style.textTransform = 'uppercase';
+    modalTable.appendChild(thead);
+
+    var tbody = document.createElement('tbody');
+    tbody.className = 'u-align-center u-custom-font u-font-montserrat u-table-body u-table-valign-middle u-table-body-1';
+    expiringLicenses.forEach(function(row) {
+      tbody.appendChild(row);
+    });
+    modalTable.appendChild(tbody);
+
+    var modal = document.getElementById('myModal');
+    var modalContent = modal.querySelector('.modal-content');
+    modalContent.appendChild(modalTable);
+  }
+  window.onload = function() {
+    populateModalWithExpiringLicenses();
+    modal.style.display = 'block';
+  }
+</script>
+
+<section class="u-clearfix u-section-1" id="sec-0743">
+  <div class="data-layout-selected u-clearfix u-expanded-width u-layout-wrap u-layout-wrap-1">
+    <div class="u-layout">
+      <div class="u-layout-row">
+        <div class="u-container-style u-custom-color-12 u-layout-cell u-size-13 u-layout-cell-1">
+          <div class="u-container-layout u-valign-bottom u-container-layout-1" style="display: block">
+            <p class="u-align-center u-custom-font u-font-montserrat u-text u-text-default u-text-1">
+              <span class="u-file-icon u-icon u-text-white u-icon-1">
+                <img src="/static/images/13.png" alt="">
+              </span>&nbsp; МЕНЮ
+            </p>
+            <div class="u-image u-image-circle u-preserve-proportions u-image-1" alt="" data-image-width="150" data-image-height="150"></div>
+            <p class="u-align-center u-custom-font u-font-montserrat u-large-text u-text u-text-variant u-text-2"><span th:text="${username}">--name--</span></p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-3">
+              <a class="link" th:href="@{/licenses}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-icon-2">
+                  <img src="/static/images/14.png" alt="">
+                </span>&nbsp; Список лицензий
+              </a>
+            </p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-4">
+              <a class="link" th:href="@{/licenses/create}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-text-white u-icon-3">
+                  <img src="/static/images/15.png" alt="">
+                </span>&nbsp; Добавить лицензию
+              </a>
+            </p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-5">
+              <a class="link" th:href="@{/types}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-icon-4">
+                  <img src="/static/images/14.png" alt="">
+                </span>&nbsp; Список типов<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;лицензий
+              </a>
+            </p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-6">
+              <a class="link" th:href="@{/types/create}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-text-white u-icon-5">
+                  <img src="/static/images/15.png" alt="">
+                </span>&nbsp; Добавить тип<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;лицензии
+              </a>
+            </p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-7">
+              <a class="link" th:href="@{/analytic}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-text-white u-icon-6">
+                  <img src="/static/images/14.png" alt="">
+                </span>&nbsp; Аналитика
+              </a>
+            </p>
+            <p class="u-align-left u-custom-font u-font-montserrat u-text u-text-8">
+              <a class="link" th:href="@{/logout}" style="text-decoration: none; color: rgb(255, 255, 255);">
+                <span class="u-file-icon u-icon u-text-white u-icon-7">
+                  <img src="/static/images/17.png" alt="">
+                </span>&nbsp; Выход
+              </a>
+            </p>
+          </div>
+        </div>
+        <div class="u-container-style u-grey-5 u-layout-cell u-size-47 u-layout-cell-2">
+          <div class="u-container-layout u-container-layout-2">
+            <img class="u-image u-image-contain u-image-default u-preserve-proportions u-image-2" src="/static/images/rostov-gosud-univer_1.png" alt="" data-image-width="2000" data-image-height="1519">
+            <div class="u-form u-form-1">
+              <form th:action="@{/licenses}" >
+                <div class="u-clearfix u-form-horizontal u-form-spacing-10 u-inner-form" style="padding: 10px;">
+                  <div class="u-form-group u-label-none">
+                    <input type="text" name="keyword" id="keyword" th:value="${keyword}" placeholder="Введите название лицензии" class="u-custom-font u-font-montserrat u-input u-input-rectangle u-radius u-input-1">
+                  </div>
+                  <div class="u-align-left u-form-group u-form-submit u-label-none">
+                    <a class="u-border-none u-btn u-btn-round u-btn-submit u-button-style u-custom-color-10 u-custom-font u-font-montserrat u-hover-custom-color-12 u-radius u-btn-1">Поиск </a>
+                    <input type="submit" class="u-form-control-hidden">
+                  </div>
+                  <div class="u-align-left u-form-group u-form-submit u-label-none" style="margin-left: 10px;">
+                    <button type="button" onclick="clearSearch()" class="u-btn u-btn-round u-button-style u-custom-color-10 u-custom-font u-font-montserrat u-hover-custom-color-12 u-radius u-btn-2">Очистить </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <h4 class="u-custom-font u-font-montserrat u-text u-text-default u-text-9">Список лицензий</h4>
+            <div class="custom-expanded u-table u-table-responsive u-table-1">
+              <table class="u-table-entity u-table-entity-1">
+                <colgroup>
+                  <col width="16.6%">
+                  <col width="16.6%">
+                  <col width="16.6%">
+                  <col width="16.6%">
+                  <col width="16.6%">
+                  <col width="16.6%">
+                  <col width="17.000000000000004%">
+                </colgroup>
+                <thead class="u-align-center u-custom-font u-font-montserrat u-table-header u-table-header-1">
+                <tr style="height: 50px;">
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-1">Наименование ПО</th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-2">Тип лицензии</th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-3">начало активации</th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-4">Окончание активации</th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-5">Кол-во всего</th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-5">Кол-во доступно </th>
+                  <th class="u-border-3 u-border-grey-25 u-border-no-left u-border-no-right u-border-no-top u-table-cell u-table-cell-6">функции</th>
+                </tr>
+                </thead>
+                <tbody class="u-align-center u-custom-font u-font-montserrat u-table-body u-table-valign-middle u-table-body-1">
+                <tr th:each="license : ${licenses}" style="height: 32px;">
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.namePo}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.idType.name}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.startDate}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.endDate}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.countStart}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell" th:text="${license.countNow}"></td>
+                  <td class="u-border-2 u-border-grey-15 u-border-no-left u-border-no-right u-table-cell u-table-cell-12">
+                    <a th:href="@{/licenses/update/{id}/(id=${license.id})}">
+                      <span class="u-file-icon u-icon u-icon-8">
+                        <img src="/static/images/4007762.png" alt="">
+                      </span>
+                    </a>&nbsp; &nbsp;|&nbsp; ​&nbsp;
+                    <a href="#" th:onclick="'javascript:openDeleteModal(\''+ ${license.id} + '\');'">
+                      <span data-href="#sec-18ff" class="u-dialog-link u-file-icon u-icon u-icon-9">
+                        <img src="/static/images/7104075.png" alt="">
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="u-clearfix u-group-elements u-group-elements-1">
+              <input type="submit" class="u-form-control-hidden">
+              <a th:href="@{/licenses/create}" class="u-border-none u-btn u-btn-round u-button-style u-custom-color-10 u-custom-font u-font-montserrat u-hover-custom-color-12 u-radius u-btn-2">Добавить</a>
+              <p class="u-custom-font u-font-montserrat u-large-text u-text u-text-default u-text-variant u-text-10">Не нашли нужную лицензию?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div th:fragment="delete-license" id="deleteLicenseModalHolder"></div>
+
+</body>
+</html>

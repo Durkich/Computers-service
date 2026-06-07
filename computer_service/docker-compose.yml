@@ -1,0 +1,164 @@
+version: '2.1'
+services:
+  database:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "psix19990"
+      POSTGRES_DB: "ComputersService"
+    networks:
+      backend:
+        aliases:
+          - "database"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./init-pgvector.sql:/docker-entrypoint-initdb.d/0-init-pgvector.sql
+
+  configserver:
+    image: kalabekov/configserver:0.0.1-SNAPSHOT
+    ports:
+      - "8071:8071"
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+
+  eurekaserver:
+    image: kalabekov/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
+
+  gatewayserver:
+    image: kalabekov/gatewayserver:0.0.1-SNAPSHOT
+    ports:
+      - "8072:8072"
+    environment:
+      PROFILE: "default"
+      SERVER_PORT: "8072"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKASERVER_URI: "http://eurekaserver:8070/eureka/"
+      EUREKASERVER_PORT: "8070"
+      CONFIGSERVER_PORT: "8071"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "gateway"
+
+  computers-service:
+    image: kalabekov/computers-service:0.0.1-SNAPSHOT
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      CONFIGSERVER_PORT: "8071"
+      DATABASESERVER_PORT: "5432"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    ports:
+      - "8081:8080"
+    networks:
+      - backend
+    restart: on-failure
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./computer-service-realm.json:/opt/keycloak/data/import/computer-service-realm.json
+    networks:
+      backend:
+        aliases:
+          - "keycloak"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  metabase-infrastructure:
+    image: metabase/metabase:latest
+    container_name: metabase-infrastructure
+    ports:
+      - "3001:3000"
+    environment:
+      MB_DB_FILE: /metabase.db/metabase.db
+    volumes:
+      - metabase-infra-data:/metabase.db
+    networks:
+      - backend
+    depends_on:
+      database:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - backend
+    restart: unless-stopped
+
+  ollama-setup:
+    image: curlimages/curl:latest
+    container_name: ollama-setup
+    depends_on:
+      - ollama
+    networks:
+      - backend
+    command: >
+      sh -c "
+        sleep 15 &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"t-tech/T-lite-it-2.1:q8_0\"}' &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"nomic-embed-text\"}'
+      "
+    restart: "no"
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
+  metabase-infra-data:
+    driver: local
+  ollama_data:
+    driver: local

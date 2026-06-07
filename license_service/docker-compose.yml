@@ -1,0 +1,143 @@
+version: '2.1'
+services:
+  database:
+    image: "postgres:latest"
+    container_name: license-database
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: "license-service"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      license-backend:
+        aliases:
+          - "license-database"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  configserver:
+    image: kalabekov/license-configserver:0.0.1-SNAPSHOT
+    container_name: license-configserver
+    ports:
+      - "8073:8071"
+    networks:
+      license-backend:
+        aliases:
+          - "license-configserver"
+
+  eurekaserver:
+    image: kalabekov/license-eurekaserver:0.0.1-SNAPSHOT
+    container_name: license-eurekaserver
+    ports:
+      - "8074:8070"
+    environment:
+      CONFIGSERVER_URI: "license-configserver"
+      CONFIGSERVER_PORT: "8073"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      license-backend:
+        aliases:
+          - "license-eurekaserver"
+
+  gatewayserver:
+    image: kalabekov/license-gatewayserver:0.0.1-SNAPSHOT
+    container_name: license-gatewayserver
+    ports:
+      - "8075:8072"
+    environment:
+      PROFILE: "default"
+      SERVER_PORT: "8075"
+      CONFIGSERVER_URI: "license-configserver"
+      CONFIGSERVER_PORT: "8073"
+      EUREKASERVER_URI: "http://license-eurekaserver:8074/eureka/"
+      EUREKASERVER_PORT: "8074"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      license-backend:
+        aliases:
+          - "license-gatewayserver"
+
+  licensing-service:
+    image: kalabekov/licensing-service:0.0.1-SNAPSHOT
+    container_name: licensing-service
+    ports:
+      - "8082:8081"
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "license-configserver"
+      CONFIGSERVER_PORT: "8073"
+      DATABASESERVER_PORT: "5433"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://license-database:5432/license-service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      - license-backend
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: license-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./license-realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ./keycloak-custom-theme-master/themes/custom-theme/theme:/opt/keycloak/themes
+      - ./docker/keycloak/realms/:/opt/keycloak/data/import/
+    networks:
+      license-backend:
+        aliases:
+          - "license-keycloak"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  metabase-license:
+    image: metabase/metabase:latest
+    container_name: metabase-license
+    ports:
+      - "3002:3000"
+    environment:
+      MB_DB_FILE: /metabase.db/metabase.db
+    volumes:
+      - metabase-license-data:/metabase.db
+    networks:
+      - license-backend
+    depends_on:
+      database:
+        condition: service_healthy
+
+networks:
+  license-backend:
+    driver: bridge
+
+volumes:
+  license-db-data:
+    driver: local
+  metabase-license-data:
+    driver: local

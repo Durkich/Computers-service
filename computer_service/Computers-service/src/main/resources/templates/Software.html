@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="ru">
+<head>
+    <title>Software</title>
+    <link rel="stylesheet" th:href="@{/style/style.css}" media="screen">
+    <link rel="stylesheet" th:href="@{/style/Software.css}" media="screen">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script type="text/javascript">
+        function openEditSoftwareModal(id){
+            $.ajax({
+                url: "/software/modal/edit/" + id,
+                success: function(data){
+                    $("#editSoftwareModalHolder").html(data);
+                    $('#editSoftwareModal').modal('show');
+                }
+            });
+        }
+
+        function openDeleteSoftwareModal(id){
+            $.ajax({
+                url: "/software/modal/delete/" + id,
+                success: function(data){
+                    $("#deleteSoftwareModalHolder").html(data);
+                    $('#deleteSoftwareModal').modal('show');
+                }
+            });
+        }
+
+        function openAddSoftwareModal(){
+            $.ajax({
+                url: "/software/modal/add",
+                success: function(data){
+                    $("#addSoftwareModalHolder").html(data);
+                    $('#addSoftwareModal').modal('show');
+                }
+            });
+        }
+    </script>
+</head>
+<body data-path-to-root="./" data-include-products="false" class="u-body u-stick-footer u-xl-mode" data-lang="ru">
+<header class="u-clearfix u-header u-palette-1-base u-header" id="Header">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <a class="u-align-left u-image u-logo u-image-1" data-image-width="150" data-image-height="109" title="Computers">
+            <img th:src="@{/images/logo.png}" class="u-logo-image u-logo-image-1">
+        </a>
+        <h3 class="style u-align-center u-custom-font u-font-roboto-slab u-headline u-text u-text-default u-text-1">
+            <a class="u-active-none u-border-none u-btn u-button-link u-button-style u-hover-none u-none u-text-body-alt-color u-btn-1">Система учета компьютерного обеспечения </a>
+        </h3>
+        <span class="u-file-icon u-icon u-text-white u-icon-1"  th:href="@{/logout}"><img th:src="@{/images/515094-b2d97c4b.png}" alt=""></span>
+        <nav class="u-menu u-menu-one-level u-offcanvas u-menu-1">
+            <div class="u-custom-menu u-nav-container">
+                <ul class="u-nav u-unstyled">
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/computers}">Компьютеры</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/laptops}">Ноутбуки</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/software}">Программное обеспечение</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/peripherals}">Периферия</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/analytic}">Аналитика</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+<section class="u-align-center u-clearfix u-section-1" id="SoftwareTable">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <p class="u-text u-text-default u-text-1">Список программного обеспечения</p>
+        <div class="u-expanded-width u-table u-table-responsive u-table-1">
+            <table class="u-table-entity u-table-entity-1">
+                <colgroup>
+                    <col width="18%">
+                    <col width="18%">
+                    <col width="18%">
+                    <col width="18%">
+                    <col width="18%">
+                    <col width="10%">
+                </colgroup>
+                <tbody class="u-table-alt-palette-1-light-3 u-table-body">
+                <tr style="height: 25px;">
+                    <td class="u-table-cell u-table-cell-1">Название</td>
+                    <td class="u-table-cell u-table-cell-2">Версия</td>
+                    <td class="u-table-cell u-table-cell-3">Наличие лицензии</td>
+                    <td class="u-table-cell u-table-cell-4">Инвентарный номер ноутбука</td>
+                    <td class="u-table-cell u-table-cell-5">Инвентарный номер компьютера</td>
+                    <td class="u-table-cell u-table-cell-6"></td>
+                </tr>
+                <tr th:each="software : ${softwareList}">
+                    <td th:text="${software.softwareName}"></td>
+                    <td th:text="${software.softwareVersion}"></td>
+                    <td th:text="${software.isLicensed ? 'Присутствует' : 'Отсутствует'}"></td>
+                    <td th:text="${software.laptop != null ? software.laptop.inventoryNumber : ''}"></td>
+                    <td th:text="${software.computer != null ? software.computer.inventoryNumber : ''}"></td>
+                    <td class="u-table-cell">
+                        <a href="#" th:onclick="'javascript:openEditSoftwareModal(\''+ ${software.id} + '\');'" class="u-active-none u-border-2 u-border-no-left u-border-no-right u-border-no-top u-border-palette-1-base u-btn u-btn-rectangle u-button-style u-dialog-link u-hover-none u-none u-btn-1">
+                            <span class="u-file-icon u-icon u-icon-1"><img th:src="@{/images/3980797.png}" alt=""></span>&nbsp;
+                        </a>
+                        <a href="#" th:onclick="'javascript:openDeleteSoftwareModal(\''+ ${software.id} + '\');'" class="u-active-none u-border-2 u-border-no-left u-border-no-right u-border-no-top u-border-palette-1-base u-btn u-btn-rectangle u-button-style u-dialog-link u-hover-none u-none u-btn-2">
+                            <span class="u-file-icon u-icon u-icon-2"><img th:src="@{/images/2716333.png}" alt=""></span>&nbsp;
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <a href="#"  onclick="openAddSoftwareModal()" class="u-btn u-btn-round u-button-style u-dialog-link u-radius u-btn-3">Добавить Программу </a>
+      </div>
+    </section>
+<div id="deleteSoftwareModalHolder"></div>
+<div id="editSoftwareModalHolder"></div>
+<div id="addSoftwareModalHolder"></div>
+    <footer class="u-clearfix u-footer u-palette-1-base" id="sec-62e1"><div class="u-clearfix u-sheet u-sheet-1">
+        <p class="u-align-center u-text u-text-default u-text-1">Ростов-На-Дону, 2026г. </p>
+      </div></footer>
+</body></html>

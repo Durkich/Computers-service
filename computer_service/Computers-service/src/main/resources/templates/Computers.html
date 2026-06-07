@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="ru">
+<head>
+    <title>Computers</title>
+    <link rel="stylesheet" th:href="@{/style/style.css}">
+    <link rel="stylesheet" th:href="@{/style/Computers.css}">
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+    <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,200,300,400,500,600,700,800,900">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <style>
+        /* Чат виджет */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .chat-header {
+            background: #353980;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 16px 16px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .chat-header:hover {
+            background: #2a2e6b;
+        }
+
+        .chat-status {
+            color: #4ade80;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-status::before {
+            content: "●";
+            font-size: 10px;
+        }
+
+        .chat-body {
+            display: none;
+            flex-direction: column;
+            height: 450px;
+            background: #f8f9fa;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .message.user {
+            background: #353980;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.typing {
+            background: white;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 0 0 16px 16px;
+            gap: 8px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            outline: none;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #353980;
+        }
+
+        .chat-input-area button {
+            background: #353980;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 8px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .chat-input-area button:hover {
+            background: #2a2e6b;
+        }
+
+        /* Анимация печати */
+        .typing-dots::after {
+            content: "●●●";
+            animation: typing 1.4s infinite;
+            display: inline-block;
+            margin-left: 4px;
+        }
+
+        @keyframes typing {
+            0%, 20% { content: "●"; }
+            40%, 60% { content: "●●"; }
+            80%, 100% { content: "●●●"; }
+        }
+
+        /* Скрыть виджет на мобилках если нужно */
+        @media (max-width: 576px) {
+            .chat-widget {
+                width: calc(100vw - 40px);
+                right: 20px;
+                bottom: 20px;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        function openDeleteModal(id){
+            $.ajax({
+                url: "/computers/modal/delete/" + id,
+                success: function(data){
+                    $("#deleteComputerModalHolder").html(data);
+                    $('#deleteComputerModal').modal('show');
+                }
+            });
+        }
+
+        function openEditModal(id){
+            $.ajax({
+                url: "/computers/modal/edit/" + id,
+                success: function(data){
+                    $("#editComputerModalHolder").html(data);
+                    $('#editComputerModal').modal('show');
+                }
+            });
+        }
+
+        function openAddComputerModal(){
+            $.ajax({
+                url: "/computers/modal/add",
+                success: function(data){
+                    $("#addComputerModalHolder").html(data);
+                    $('#addComputerModal').modal('show');
+                }
+            });
+        }
+
+        function toggleChat() {
+            const body = document.getElementById('chatBody');
+            if (body.style.display === 'none' || body.style.display === '') {
+                body.style.display = 'flex';
+            } else {
+                body.style.display = 'none';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesContainer = document.getElementById('chatMessages');
+
+            messagesContainer.innerHTML += `<div class="message user">${escapeHtml(message)}</div>`;
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            const typingId = 'typing-' + Date.now();
+            messagesContainer.innerHTML += `<div id="${typingId}" class="message bot typing">печатает<span class="typing-dots"></span></div>`;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                const typingMsg = document.getElementById(typingId);
+                if (typingMsg) typingMsg.remove();
+
+                const reply = data.reply || "Извините, не удалось получить ответ";
+                messagesContainer.innerHTML += `<div class="message bot">${escapeHtml(reply)}</div>`;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error('Chat error:', error);
+                const typingMsg = document.getElementById(typingId);
+                if (typingMsg) typingMsg.remove();
+                messagesContainer.innerHTML += `<div class="message bot">⚠️ Ошибка соединения. Убедитесь, что сервер запущен.</div>`;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</head>
+<body data-path-to-root="./" data-include-products="false" class="u-body u-stick-footer u-xl-mode" data-lang="ru">
+<header class="u-clearfix u-header u-palette-1-base u-header" id="Header">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <a class="u-align-left u-image u-logo u-image-1" data-image-width="150" data-image-height="109" title="Computers">
+            <img th:src="@{/images/logo.png}" class="u-logo-image u-logo-image-1">
+        </a>
+        <h3 class="style u-align-center u-custom-font u-font-roboto-slab u-headline u-text u-text-default u-text-1">
+            <a class="u-active-none u-border-none u-btn u-button-link u-button-style u-hover-none u-none u-text-body-alt-color u-btn-1">Система учета компьютерного обеспечения</a>
+        </h3>
+        <span class="u-file-icon u-icon u-text-white u-icon-1" th:href="@{/logout}"><img th:src="@{/images/515094-b2d97c4b.png}" alt=""></span>
+        <nav class="u-menu u-menu-one-level u-offcanvas u-menu-1">
+            <div class="u-custom-menu u-nav-container">
+                <ul class="u-nav u-unstyled">
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/computers}">Компьютеры</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/laptops}">Ноутбуки</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/software}">Программное обеспечение</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/peripherals}">Периферия</a></li>
+                    <li class="u-nav-item"><a class="u-button-style u-nav-link" th:href="@{/analytic}">Аналитика</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<section class="u-align-center u-clearfix u-section-1" id="ComputersTable">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <p class="u-text u-text-default u-text-1">Список компьютеров</p>
+        <div class="u-expanded-width u-table u-table-responsive u-table-1">
+            <table class="u-table-entity u-table-entity-1">
+                <colgroup>
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="10%">
+                </colgroup>
+                <tbody class="u-table-alt-palette-1-light-3 u-table-body">
+                <tr style="height: 25px;">
+                    <td class="u-table-cell u-table-cell-1">Инвентарный номер</td>
+                    <td class="u-table-cell u-table-cell-2">Графический адаптер</td>
+                    <td class="u-table-cell u-table-cell-3">Процессор</td>
+                    <td class="u-table-cell u-table-cell-4">Объем ПЗУ</td>
+                    <td class="u-table-cell u-table-cell-5">Объем ОЗУ</td>
+                    <td class="u-table-cell u-table-cell-6">Аудитория</td>
+                    <td class="u-table-cell u-table-cell-7"></td>
+                </tr>
+                <tr th:each="computer : ${computers}">
+                    <td th:text="${computer.inventoryNumber}"></td>
+                    <td th:text="${computer.graphicAdapter}"></td>
+                    <td th:text="${computer.processor}"></td>
+                    <td th:text="${computer.rom}"></td>
+                    <td th:text="${computer.ram}"></td>
+                    <td th:text="${computer.roomNumber}"></td>
+                    <td class="u-table-cell">
+                        <a href="#" th:onclick="'javascript:openEditModal(\''+ ${computer.id} + '\');'" class="u-active-none u-border-2 u-border-no-left u-border-no-right u-border-no-top u-border-palette-1-base u-btn u-btn-rectangle u-button-style u-dialog-link u-hover-none u-none u-text-body-alt-color u-btn-1">
+                            <span class="u-file-icon u-icon u-icon-1"><img th:src="@{/images/3980797.png}" alt=""></span>&nbsp;
+                        </a>
+                        <a href="#" th:onclick="'javascript:openDeleteModal(\''+ ${computer.id} + '\');'" class="u-active-none u-border-2 u-border-no-left u-border-no-right u-border-no-top u-border-palette-1-base u-btn u-btn-rectangle u-button-style u-dialog-link u-hover-none u-none u-btn-2">
+                            <span class="u-file-icon u-icon u-icon-2"><img th:src="@{/images/2716333.png}" alt=""></span>&nbsp;
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <a href="#" onclick="openAddComputerModal()" class="u-btn u-btn-round u-button-style u-dialog-link u-radius u-btn-3">Добавить Компьютер</a>
+    </div>
+</section>
+
+<div class="chat-widget">
+    <div class="chat-header" onclick="toggleChat()">
+        <span>ИТ Ассистент</span>
+        <span class="chat-status">онлайн</span>
+    </div>
+    <div class="chat-body" id="chatBody" style="display: none;">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">Привет! Я могу ответить на вопросы о компьютерах, ноутбуках, программном обеспечении и периферии. Что вас интересует?</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Задайте вопрос..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteComputerModalHolder"></div>
+<div id="editComputerModalHolder"></div>
+<div id="addComputerModalHolder"></div>
+
+<footer class="u-clearfix u-footer u-palette-1-base" id="Footer">
+    <div class="u-clearfix u-sheet u-sheet-1">
+        <p class="u-align-center u-text u-text-default u-text-1">Ростов-На-Дону, 2026г.</p>
+    </div>
+</footer>
+</body>
+</html>

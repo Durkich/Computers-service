@@ -1,0 +1,44 @@
+<section class="u-black u-clearfix u-container-style u-dialog-block u-opacity u-opacity-70 u-dialog-section-8" id="deleteLaptopModal" th:fragment="delete-laptop">
+    <div class="u-align-justify u-container-style u-dialog u-white u-dialog-1">
+        <div class="u-container-layout u-container-layout-1">
+            <p class="u-align-center u-text u-text-default u-text-1">Вы уверены, что хотите удалить данный ноутбук? </p>
+            <a th:href="@{'/laptops/delete/' + ${laptop.id}}" class="u-align-left u-btn u-btn-round u-button-style u-radius u-btn-1">Удалить </a>
+            <a href="#" class="u-align-left u-btn u-btn-round u-button-style u-radius u-btn-2" data-dismiss="modal">Отмена </a>
+        </div>
+    </div>
+    <style>.u-dialog-section-8 .u-dialog-1 {
+        width: 530px;
+        min-height: 134px;
+        height: auto;
+        margin: 338px auto 60px;
+    }
+
+    .u-dialog-section-8 .u-container-layout-1 {
+        padding: 0 0 13px;
+    }
+
+    .u-dialog-section-8 .u-text-1 {
+        margin: 17px 31px 0;
+    }
+
+    .u-dialog-section-8 .u-btn-1 {
+        --radius: 12px;
+        margin: 12px auto 0 119px;
+    }
+
+    .u-dialog-section-8 .u-btn-2 {
+        --radius: 12px;
+        margin: -45px 119px 0 291px;
+    }
+
+    .u-dialog-section-8 .u-icon-1 {
+        width: 15px;
+        height: 15px;
+        left: auto;
+        top: 119px;
+        position: absolute;
+        right: 0;
+        padding: 0;
+    }
+    </style>
+</section>
